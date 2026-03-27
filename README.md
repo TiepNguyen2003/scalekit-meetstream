@@ -40,7 +40,6 @@ cp .env.example .env
 
 ```env
 MEET_STREAM_API_KEY=your_meetstream_api_key
-DEEPGRAM_API_KEY=your_deepgram_api_key
 
 SCALEKIT_ENV_URL=https://your-env.scalekit.dev
 SCALEKIT_CLIENT_ID=your_client_id

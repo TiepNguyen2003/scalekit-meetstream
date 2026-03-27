@@ -133,7 +133,7 @@ def webhook():
 
         # Use Scalekit's execute_tool to create a Notion page
         # Notion tools reference: https://docs.scalekit.com/reference/agent-connectors/notion/
-        scalekit.actions.execute_tool(
+        result = scalekit.actions.execute_tool(
             tool_name="notion_page_create",
             identifier=IDENTIFIER,
             tool_input={
@@ -161,6 +161,14 @@ def webhook():
                     },
                 ],
             },
+        )
+        page_url = result.data.get("url")
+        print(
+            "\n"
+            "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
+            f"  📄 Notion page created:\n\n"
+            f"     {page_url}\n"
+            "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
         )
 
     return "", 200

@@ -1,4 +1,4 @@
-# meet-stream
+# Scalekit x MeetStream
 
 A sample app that joins Google Meet calls using a [MeetStream](https://meetstream.ai) bot, listens for transcription webhook events, and automatically creates a Notion page for each transcription event — enriched with meeting details. Notion is connected and authorized via [Scalekit](https://scalekit.com).
 

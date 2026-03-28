@@ -1,5 +1,6 @@
 import json
 import os
+import subprocess
 from pathlib import Path
 
 import requests
@@ -12,11 +13,19 @@ CREATE_BOT_URL = "https://api.meetstream.ai/api/v1/bots/create_bot"
 REMOVE_BOT_URL_TEMPLATE = "https://api.meetstream.ai/api/v1/bots/{bot_id}/remove_bot"
 
 
-def _get_headers():
+def _get_api_key():
     load_dotenv()
     api_key = os.getenv("MEET_STREAM_API_KEY")
     if not api_key:
         return None, "Please add MEET_STREAM_API_KEY to your .env file."
+
+    return api_key, None
+
+
+def _get_headers():
+    api_key, error_message = _get_api_key()
+    if error_message:
+        return None, error_message
 
     return {
         "Authorization": f"Token {api_key}",
@@ -65,24 +74,30 @@ def disconnect_bot():
     if not bot_id:
         return False, "No bot_id was found in last_bot_created.json."
 
-    headers, error_message = _get_headers()
+    api_key, error_message = _get_api_key()
     if error_message:
         return False, error_message
 
-    payload = {"bot_id": bot_id}
+    command = [
+        "curl",
+        REMOVE_BOT_URL_TEMPLATE.format(bot_id=bot_id),
+        "-H",
+        f"Authorization: {api_key}",
+    ]
 
     try:
-        response = requests.post(
-            REMOVE_BOT_URL_TEMPLATE.format(bot_id=bot_id),
-            headers=headers,
-            json=payload,
+        response = subprocess.run(
+            command,
+            capture_output=True,
+            text=True,
             timeout=30,
         )
-    except requests.RequestException as exc:
+    except (OSError, subprocess.SubprocessError) as exc:
         return False, f"Failed to remove bot: {exc}"
 
-    if response.status_code != 200:
-        return False, f"Failed to remove bot. Status: {response.status_code}. {response.text}"
+    if response.returncode != 0:
+        error_output = response.stderr.strip() or response.stdout.strip()
+        return False, f"Failed to remove bot. {error_output}"
 
     return True, f"Successfully removed bot: {bot_id}"
 

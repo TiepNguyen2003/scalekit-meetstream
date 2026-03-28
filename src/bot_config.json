@@ -1,20 +1,4 @@
 {
-  "meeting_link": "https://meet.google.com/urt-vkhb-cxq",
-  "video_required": false,
-  "live_transcription_required": {
-    "webhook_url": "https://kacy-unguessable-rostrally.ngrok-free.dev"
-  },
-  "recording_config": {
-    "transcript": {
-      "provider": {
-        "deepgram_streaming": {
-          "transcription_mode": "sentence",
-          "model": "nova-2",
-          "language": "en",
-          "punctuate": true,
-          "smart_format": true
-        }
-      }
-    }
-  }
+  "meeting_link": "https://meet.google.com/cah-dshw-wjf",
+  "video_required": false
 }

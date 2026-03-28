@@ -88,10 +88,4 @@ def disconnect_bot():
 
 
 
-def join_meeting(url: str):
-    return connect_bot()
-
-
-
-def leave_meeting():
-    return disconnect_bot()
+print(disconnect_bot())

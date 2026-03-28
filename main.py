@@ -1,12 +1,18 @@
+from datetime import datetime
 import os
 import uvicorn
 from fastapi import FastAPI, Request, Response
 from dotenv import load_dotenv
 
+from src.transcript_manager import TranscriptManager
+from src.types import TranscriptWord
+
 # Remove the Flask imports:
 # from flask import Flask, request
 
 app = FastAPI(title="Agent Backend")
+transcript_manager = TranscriptManager()
+
 
 @app.post("/webhook")
 async def webhook(request: Request):
@@ -19,20 +25,33 @@ async def webhook(request: Request):
     print(data)    
     
     # Check if this is a transcription payload by looking for expected keys
-    if data and "speakerName" in data and "transcript" in data:
-        bot_id = data.get("bot_id", "unknown")
+    if data and "words" in data and isinstance(data["words"], list):
+        speakerName = data.get("speakerName", "Unknown")
+        timestamp = datetime.fromtimestamp(data.get("start", 0)) 
+        for word_data in data["words"]:
+            # Map the dictionary keys to your TranscriptWord type
+            # Note: Adjust these keys if your TranscriptWord class uses different names
+            
+
+            word_obj = TranscriptWord(
+                speakerName = speakerName,
+                timestamp = timestamp,
+                word = word_data.get("word", ""),
+                speakerConfidence = word_data.get("confidence", 0.0),
+                startTime = word_data.get("start", 0.0),
+                endTime = word_data.get("end", 0.0),
+                is_final = word_data.get("is_final", False)
+            )
+            
+            # Store in the singleton manager
+            new_index = transcript_manager.add_word(word_obj)
+
+            print(word_obj)
+        
+        # Log the update
         speaker = data.get("speakerName", "Unknown")
-        
-        # 'new_text' usually contains the latest spoken words
-        new_text = data.get("new_text", "")
-        
-        # 'end_of_turn' is useful to know if the person has stopped speaking
-        is_final = data.get("end_of_turn", False)
-        
-        # Print the live transcription update to the console
-        if new_text.strip():
-            status_marker = "[FINAL]" if is_final else "[...]"
-            print(f"🎙️ {speaker} {status_marker}: {new_text}")
+        transcript_text = data.get("transcript", "")
+        print(f"✅ Processed {len(data['words'])} words from {speaker}: '{transcript_text}'")
 
         # ---------------------------------------------------------
         # TODO: Here is where you would write this text to a database, 

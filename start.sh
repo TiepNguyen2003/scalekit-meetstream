@@ -2,7 +2,7 @@ curl -X POST https://api.meetstream.ai/api/v1/bots/create_bot \
      -H "Authorization: Token ms_Zg9tcT1dzX5ugGIAO0bajEuLoOu8EhoJ" \
      -H "Content-Type: application/json" \
      -d '{
-  "meeting_link": "https://meet.google.com/mrc-ptni-utp",
+  "meeting_link": "https://meet.google.com/ngc-kiyu-fue",
   "bot_name": "Meetstream Agent",
   "video_required": true,
   "live_transcription_required": {

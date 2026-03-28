@@ -12,3 +12,4 @@ wheels/
 # Environment variables
 .env
 .keys
+system_debug.log

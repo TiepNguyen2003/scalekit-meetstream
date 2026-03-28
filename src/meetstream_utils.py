@@ -1,3 +1,14 @@
+import os
+import json
+import requests
+from dotenv import load_dotenv
+from fastapi import FastAPI, Request, BackgroundTasks
+
+from scalekit.client import ScalekitClient
+import scalekit
+from globals import CONNECTION_NAME, IDENTIFIER
+
+load_dotenv()
 def ensure_authenticated():
     # Get or create a connected account for this user+connector pair.
     # A connected account represents a user's authorized connection to a third-party app (Notion here).
@@ -7,6 +18,7 @@ def ensure_authenticated():
             identifier=IDENTIFIER,
         )
     except Exception as e:
+        print(e)
         raise RuntimeError(
             "\n"
             "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
@@ -17,32 +29,6 @@ def ensure_authenticated():
             "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
         ) from e
     connected_account = response.connected_account
-
-    if connected_account.status != "ACTIVE":
-        # Generate a one-time OAuth authorization link.
-        # User must visit this link to grant our app access to their Notion workspace.
-        # Scalekit handles the full OAuth 2.0 flow and stores the token securely.
-        link_response = scalekit.actions.get_authorization_link(
-            connection_name=CONNECTION_NAME,
-            identifier=IDENTIFIER,
-        )
-        print(f"Notion is not connected (status: {connected_account.status})")
-        print(f"\n🔗 Authorize here:\n\n    {link_response.link}\n")
-        input("⎆ Press Enter after authorizing...")
-
-        # Re-check status after user completes authorization
-        recheck = scalekit.actions.get_or_create_connected_account(
-            connection_name=CONNECTION_NAME,
-            identifier=IDENTIFIER,
-        )
-        if recheck.connected_account.status != "ACTIVE":
-            raise RuntimeError(
-                f"Authorization incomplete (status: {recheck.connected_account.status}). "
-                "Please restart and complete the authorization flow."
-            )
-        print(f"✓ Connected account is active: {recheck.connected_account.id}")
-    else:
-        print(f"✓ Connected account is active: {connected_account.id}")
 
 
 def get_bot_details(bot_id):

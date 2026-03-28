@@ -9,6 +9,15 @@ from dotenv import load_dotenv
 from src.transcript_manager import TranscriptManager
 from src.types import TranscriptWord
 
+import logging
+
+logging.basicConfig(
+    filename="system_debug.log",
+    level=logging.INFO,
+    format="%(asctime)s - %(message)s"
+)
+logger = logging.getLogger(__name__)
+
 app = FastAPI(title="Agent Backend")
 transcript_manager = TranscriptManager()
 
@@ -41,10 +50,18 @@ async def webhook(request: Request):
         data = {} # Failsafe in case of empty or invalid JSON, similar to silent=True   
     
     # Check if this is a transcription payload by looking for expected keys
-    if data and "words" in data and isinstance(data["words"], list):
+
+    logger.info(f"Received message: {data}")
+    if data:
+        if not data["end_of_turn"]:
+            return {"status": "ignored", "reason": "Not end of turn"}
+        if "words" not in data or not isinstance(data["words"], list):
+            logger.warning("Received data does not contain 'words' key or it's not a list.")
+            return {"status": "ignored", "reason": "Invalid payload structure"}
+        print(f"Processing {data['transcript']}")
         speakerName = data.get("speakerName", "Unknown")
         timestamp = datetime.fromtimestamp(data.get("start", 0)) 
-        new_words_for_broadcast = []
+        words_to_add = []
         had_final = False
         for word_data in data["words"]:
             # Map the dictionary keys to your TranscriptWord type
@@ -64,15 +81,14 @@ async def webhook(request: Request):
             )
 
             
-            
-            
             transcript_manager.add_word(word_obj)
+        
             
 
         # Log the update
         speaker = data.get("speakerName", "Unknown")
         transcript_text = data.get("transcript", "")
-        print(f"✅ Processed {len(data['words'])} words from {speaker}: '{transcript_text}'")
+        #print(f"✅ Processed {len(data['words'])} words from {speaker}: '{transcript_text}'")
 
     
 
@@ -102,7 +118,7 @@ async def websocket_endpoint(websocket: WebSocket):
             # 3. Sleep for a bit before checking again (e.g., 2 seconds)
             # You can tweak this number to be faster (0.5) or slower (5)
             
-            await asyncio.sleep(0.5)
+            await asyncio.sleep(0.05)
     except WebSocketDisconnect:
         manager.disconnect(websocket)
 if __name__ == "__main__":

@@ -13,6 +13,7 @@ CREATE_BOT_URL = "https://api.meetstream.ai/api/v1/bots/create_bot"
 REMOVE_BOT_URL_TEMPLATE = "https://api.meetstream.ai/api/v1/bots/{bot_id}/remove_bot"
 
 
+
 def _get_api_key():
     load_dotenv()
     api_key = os.getenv("MEET_STREAM_API_KEY")
@@ -20,6 +21,7 @@ def _get_api_key():
         return None, "Please add MEET_STREAM_API_KEY to your .env file."
 
     return api_key, None
+
 
 
 def _get_headers():
@@ -100,7 +102,3 @@ def disconnect_bot():
         return False, f"Failed to remove bot. {error_output}"
 
     return True, f"Successfully removed bot: {bot_id}"
-
-
-
-print(disconnect_bot())

@@ -1,4 +1,10 @@
 streamlit
 requests
-
 python-dotenv
+flask
+fastapi
+uvicorn
+websocket-client
+websockets
+google-adk
+scalekit-sdk-python

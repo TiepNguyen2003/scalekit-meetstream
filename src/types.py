@@ -22,7 +22,7 @@ class TranscriptWord():
     startTime : float
     endTime : float
     is_final : bool
-    
+
     def to_dict(self) -> dict:
         return {
             "speakerName": self.speakerName,
@@ -34,3 +34,6 @@ class TranscriptWord():
             "endTime": self.endTime,
             "is_final": self.is_final
         }
+    
+    def __hash__(self) -> int:
+        return hash((self.speakerName, self.word, self.startTime, self.endTime))

@@ -1,4 +1,5 @@
 import os
+import sys
 
 from dotenv import load_dotenv
 from scalekit.client import ScalekitClient
@@ -6,7 +7,8 @@ from scalekit.client import ScalekitClient
 load_dotenv()
 
 CONNECTION_NAME = os.getenv("SCALEKIT_CONNECTION_NAME", "gmail")
-IDENTIFIER = os.getenv("SCALEKIT_IDENTIFIER", "test_identifier")
+CONNECTED_ACCOUNT_ID = os.getenv("SCALEKIT_CONNECTED_ACCOUNT_ID")
+IDENTIFIER = os.getenv("SCALEKIT_IDENTIFIER")
 
 scalekit = ScalekitClient(
     env_url=os.getenv("SCALEKIT_ENV_URL"),
@@ -62,9 +64,21 @@ def ensure_authenticated(required_scopes: list[str] | None = None):
         connection_name=CONNECTION_NAME,
         identifier=IDENTIFIER,
     )
+    link = link_response.link
     print(f"Scalekit connection '{CONNECTION_NAME}' is not active (status: {connected_account.status})")
-    print(f"\nAuthorize here:\n\n    {link_response.link}\n")
-    input("Press Enter after authorizing...")
+    print(f"\nAuthorize here:\n\n    {link}\n")
+
+    if not sys.stdin.isatty():
+        raise RuntimeError(
+            f"Gmail connection '{CONNECTION_NAME}' requires re-authorization. Open this link and retry: {link}"
+        )
+
+    try:
+        input("Press Enter after authorizing...")
+    except EOFError as exc:
+        raise RuntimeError(
+            f"Gmail connection '{CONNECTION_NAME}' requires re-authorization. Open this link and retry: {link}"
+        ) from exc
 
     recheck = scalekit.actions.get_or_create_connected_account(
         connection_name=CONNECTION_NAME,

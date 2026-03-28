@@ -1,7 +1,7 @@
 import streamlit as st
 
+from login import render_login
 
-st.set_page_config(page_title="Launcher", page_icon=":rocket:")
+st.set_page_config(page_title="Launcher", page_icon=":rocket:", layout="wide")
 
-st.title("Empty")
-st.caption("Empty Streamlit page ready for implementation.")
+render_login()

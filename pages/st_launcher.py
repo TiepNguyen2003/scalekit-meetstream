@@ -4,7 +4,6 @@ from pathlib import Path
 import streamlit as st
 
 from login import render_login
-from src.meeting_agent import connect_bot, disconnect_bot
 from src.transcript_manager import TranscriptManager
 
 st.set_page_config(page_title="Launcher", page_icon=":rocket:", layout="wide")
@@ -19,12 +18,6 @@ BOT_CONFIG_PATH = Path(__file__).resolve().parents[1] / "src" / "bot_config.json
 def _ensure_card_state():
     if "launcher_cards" not in st.session_state:
         st.session_state.launcher_cards = []
-
-
-
-def _ensure_bot_status_state():
-    if "bot_status" not in st.session_state:
-        st.session_state.bot_status = None
 
 
 
@@ -51,18 +44,6 @@ def _ensure_meeting_link_state():
     if "meeting_link" not in st.session_state:
         bot_config = _load_bot_config()
         st.session_state.meeting_link = bot_config.get("meeting_link", "")
-
-
-
-def _connect_bot():
-    success, message = connect_bot()
-    st.session_state.bot_status = (success, message)
-
-
-
-def _disconnect_bot():
-    success, message = disconnect_bot()
-    st.session_state.bot_status = (success, message)
 
 
 
@@ -95,7 +76,6 @@ def _delete_card(card_id: int):
 
 render_login()
 _ensure_card_state()
-_ensure_bot_status_state()
 _ensure_meeting_link_state()
 
 st.title("Launcher")
@@ -105,18 +85,6 @@ st.text_input(
     on_change=_save_meeting_link,
     placeholder="https://meet.google.com/...",
 )
-
-connect_col, disconnect_col = st.columns(2)
-connect_col.button("Connect bot", on_click=_connect_bot, use_container_width=True)
-disconnect_col.button("Disconnect bot", on_click=_disconnect_bot, use_container_width=True)
-
-if st.session_state.bot_status is not None:
-    success, message = st.session_state.bot_status
-    if success:
-        st.success(message)
-    else:
-        st.error(message)
-
 st.button(
     "Generate 5 cards from transcript",
     on_click=_generate_cards_from_transcript,
